@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debouncing Movie Search</title>
+  <style>
+    #search_box {
+      width: 250px;
+      height: 400px;
+      border: 2px solid;
+      margin-top: 10px;
+      overflow-y: auto;
+    }
+
+    #search_box > div {
+      display: flex; /* fixed typo */
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      border: 2px solid red;
+      padding: 5px;
+    }
+
+    #search_box > div > img {
+      width: 40px;
+      height: 40px;
+    }
+
+    input {
+      font-size: 25px;
+      width: 250px;
+      height: 50px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Debouncing Movie Search</h1>
+  <input oninput="Delay()" type="text" placeholder="search movie.....">
+  <div id="search_box"></div>
+
+  <script>
+    let api = "http://www.omdbapi.com/?apikey=105fb6bc";
+    let input = document.querySelector("input");
+    let search_box = document.getElementById("search_box");
+
+    // fetch data from API
+    const getData = async () => {
+      let x = input.value.trim();
+      if (!x) return; // avoid empty calls
+
+      let res = await fetch(`${api}&s=${x}`);
+      let data = await res.json();
+
+      if (data.Search) {
+        display(data.Search);
+      } else {
+        search_box.innerHTML = "<p>No results found</p>";
+      }
+    };
+
+    // debounce function
+    let timerId;
+    function Delay() {
+      clearTimeout(timerId);
+      timerId = setTimeout(getData, 1000);
+    }
+
+    // display data in DOM
+    function display(data) {
+      search_box.innerHTML = "";
+      data.forEach(({ Title, Poster, Year }) => {
+        let title = document.createElement("h4");
+        title.innerText = Title;
+
+        let year = document.createElement("h5");
+        year.innerText = Year;
+
+        let img = document.createElement("img");
+        img.src = Poster;
+
+        let div = document.createElement("div");
+        div.append(img, title, year); // ✅ append elements correctly
+
+        search_box.append(div);
+      });
+    }
+  </script>
+</body>
+</html>
